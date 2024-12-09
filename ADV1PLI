@@ -1,35 +1,62 @@
- ADV1PLI:PROCEDURE OPTIONS(MAIN);                  
-                                                   
-  DCL INFL FILE RECORD INPUT;                      
-  DCL I FIXED BINARY(15);                          
-  DCL 1 ULAZ(1000),                                
-        2 LJEVI PIC'99999',                        
-        2 FILL1 CHAR(3),                           
-        2 DESNI PIC'99999';                        
-  DCL L_NUMS(1000) PIC'99999';                     
-  DCL R_NUMS(1000) PIC'99999';                     
-  DCL SUMA FIXED BINARY(31) INIT(0);               
-                                                   
-  OPEN FILE(INFL);                                 
-                                                   
-  ULAZ = ''; /* NAPUNI STRUKTURU */                
-  PETLJA1:DO I = 1 TO 1000;                        
-   READ FILE(INFL) INTO(ULAZ(I));                  
-   L_NUMS(I) = ULAZ(I).LJEVI;                      
-   R_NUMS(I) = ULAZ(I).DESNI;                      
-  END PETLJA1;                                     
-                                                   
-   /* SORTIRAJ VEKTORE */                          
-  CALL QUICKSORT(L_NUMS);                          
-  CALL QUICKSORT(R_NUMS);                          
-                                                   
-   /* ZBROJI OSTATAK */                            
-  PETLJA2:DO I = 1 TO 1000;                        
-   SUMA = SUMA + ABS(L_NUMS(I) - R_NUMS(I));       
-  END PETLJA2;                                     
-                                                   
-  PUT SKIP EDIT(SCRUBOUT(CHAR(SUMA),' '))(A);      
-                                                   
-  CLOSE FILE(INFL);                                
-                                                   
- END ADV1PLI;                                      
+ ADV1PLI:PROCEDURE OPTIONS(MAIN);                         
+                                                          
+  DCL INFL FILE RECORD INPUT;                             
+  DCL (I, J) FIXED BINARY(15);                            
+  DCL 1 ULAZ(1000),                                       
+        2 LJEVI PIC'99999',                               
+        2 FILL1 CHAR(3),                                  
+        2 DESNI PIC'99999';                               
+  DCL L_NUMS(1000) PIC'99999';                            
+  DCL R_NUMS(1000) PIC'99999';                            
+  DCL SUMA FIXED BINARY(31) INIT(0);                      
+                                                          
+  DCL BR_LJ   FIXED BINARY(15) INIT(0);                   
+  DCL CURENT_NUM PIC'99999';                              
+  DCL UMNOZAK_TRENUTNOG FIXED BINARY(31) INIT(0);         
+  DCL SIMILARITY_SCORE FIXED BINARY(31) INIT(0);          
+                                                          
+  OPEN FILE(INFL);                                        
+                                                          
+  ULAZ = ''; /* NAPUNI STRUKTURU */                       
+  PETLJA1:DO I = 1 TO 1000;                               
+   READ FILE(INFL) INTO(ULAZ(I));                         
+   L_NUMS(I) = ULAZ(I).LJEVI;                             
+   R_NUMS(I) = ULAZ(I).DESNI;                             
+  END PETLJA1;                                            
+                                                          
+   /* SORTIRAJ VEKTORE */                                 
+  CALL QUICKSORT(L_NUMS);                                 
+  CALL QUICKSORT(R_NUMS);                                 
+  BR_LJ = 0;                                              
+  DO I = 1 TO 1000;                                       
+   CURENT_NUM = L_NUMS(I);                                
+   DO J = 1 TO 1000;                                      
+                                                          
+      /* PROVJERI LJEVI DIO */                            
+     IF CURENT_NUM = R_NUMS(J) THEN DO;            
+        BR_LJ += 1;                                              
+      /*PUT SKIP EDIT(L_NUMS(I),' ',R_NUMS(J))(A);*/             
+     END;                                                        
+                                                                 
+   END;                                                          
+   UMNOZAK_TRENUTNOG = CURENT_NUM * BR_LJ;                       
+   SIMILARITY_SCORE = SIMILARITY_SCORE + UMNOZAK_TRENUTNOG;      
+   REINIT UMNOZAK_TRENUTNOG;                                     
+   REINIT CURENT_NUM;                                            
+   REINIT BR_LJ;                                                 
+  END;                                                           
+  PUT SKIP EDIT(SCRUBOUT(CHAR(SIMILARITY_SCORE),' '))(A);        
+                                                                 
+   /* ZBROJI OSTATAK */                                          
+  PETLJA2:DO I = 1 TO 1000;                                      
+   SUMA = SUMA + ABS(L_NUMS(I) - R_NUMS(I));                     
+  END PETLJA2;                                                   
+                                                                 
+  PUT SKIP EDIT(SCRUBOUT(CHAR(SUMA),' '))(A);                    
+                                                                 
+  CLOSE FILE(INFL);                                              
+                                                                 
+  ADD_SAME:PROCEDURE;                                            
+  END ADD_SAME;                                                  
+                                                                 
+ END ADV1PLI;                                                    	 
