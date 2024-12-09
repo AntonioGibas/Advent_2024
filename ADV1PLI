@@ -1,0 +1,35 @@
+ ADV1PLI:PROCEDURE OPTIONS(MAIN);                  
+                                                   
+  DCL INFL FILE RECORD INPUT;                      
+  DCL I FIXED BINARY(15);                          
+  DCL 1 ULAZ(1000),                                
+        2 LJEVI PIC'99999',                        
+        2 FILL1 CHAR(3),                           
+        2 DESNI PIC'99999';                        
+  DCL L_NUMS(1000) PIC'99999';                     
+  DCL R_NUMS(1000) PIC'99999';                     
+  DCL SUMA FIXED BINARY(31) INIT(0);               
+                                                   
+  OPEN FILE(INFL);                                 
+                                                   
+  ULAZ = ''; /* NAPUNI STRUKTURU */                
+  PETLJA1:DO I = 1 TO 1000;                        
+   READ FILE(INFL) INTO(ULAZ(I));                  
+   L_NUMS(I) = ULAZ(I).LJEVI;                      
+   R_NUMS(I) = ULAZ(I).DESNI;                      
+  END PETLJA1;                                     
+                                                   
+   /* SORTIRAJ VEKTORE */                          
+  CALL QUICKSORT(L_NUMS);                          
+  CALL QUICKSORT(R_NUMS);                          
+                                                   
+   /* ZBROJI OSTATAK */                            
+  PETLJA2:DO I = 1 TO 1000;                        
+   SUMA = SUMA + ABS(L_NUMS(I) - R_NUMS(I));       
+  END PETLJA2;                                     
+                                                   
+  PUT SKIP EDIT(SCRUBOUT(CHAR(SUMA),' '))(A);      
+                                                   
+  CLOSE FILE(INFL);                                
+                                                   
+ END ADV1PLI;                                      
